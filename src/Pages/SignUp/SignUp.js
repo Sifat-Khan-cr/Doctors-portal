@@ -1,17 +1,34 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from "react-hook-form";
+import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../Contexts/AuthProvider';
 const SignUp = () => {
-    const { createUser } = useContext(AuthContext);
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { createUser, updateUser, googlePopup } = useContext(AuthContext);
+    const [signUpError, setSignUpError] = useState('');
+    const { register, handleSubmit, reset, formState: { errors } } = useForm();
     const onSubmit = data => {
         createUser(data.email, data.password)
             .then(result => {
+                setSignUpError('');
                 const user = result.user;
-                console.log(user);
+                toast('user created success');
+                const userInfo = {
+                    displayName: data.name,
+                }
+                // console.log(userInfo);
+                // updateUser(userInfo)
+                //     .then(() => { })
+                //     .catch(error => {
+                //         console.error(error)
+                //         setSignUpError(error.message)
+                //     });
             })
-            .catch(error => console.error(error));
+            .catch(error => {
+                console.error(error);
+                setSignUpError(error.message);
+            });
+        reset();
     };
     return (
         <div className='h-[800px] flex justify-center items-center shadow-2xl'>
@@ -31,10 +48,13 @@ const SignUp = () => {
                     {errors.password && <p className='text-red-600' role="alert">{errors.password?.message}</p>}
 
                     <input className='btn btn-accent w-full mt-3' value="Sign-up" type="submit" />
+                    {
+                        signUpError && <p className='text-red-600'>{signUpError}</p>
+                    }
                 </form>
                 <p className='text-center'>Already Have an Account <Link to='/login' className='text-secondary'>Login now</Link></p>
                 <div className="divider">OR</div>
-                <button className='btn btn-outline w-full'>Continue With Google</button>
+                <button onClick={googlePopup} className='btn btn-outline w-full'>Continue With Google</button>
             </div>
 
         </div>

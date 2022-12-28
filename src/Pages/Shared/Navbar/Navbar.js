@@ -12,6 +12,7 @@ const Navbar = () => {
             user?.email ?
                 <>
                     <li><Link to='/dashboard' >Dashboard</Link></li>
+                    <li><Link to='#' >{user.displayName}</Link></li>
                     <li><button onClick={logOut} >Sign-Out</button></li></>
                 :
                 <>

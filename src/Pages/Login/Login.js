@@ -1,21 +1,26 @@
 import React, { useContext, useState } from 'react';
 import { useForm } from "react-hook-form";
-import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Contexts/AuthProvider';
 
 const Login = () => {
-    const { signIn } = useContext(AuthContext);
+    const { signIn, googlePopup } = useContext(AuthContext);
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
     const [loginError, setLoginError] = useState('');
+    const location = useLocation();
+    const navigate = useNavigate();
+    const from = location.state?.from.pathname || '/';
     const onSubmit = data => {
         setLoginError('');
-        reset({ ...data })
-        // console.log(data);
+        reset();
         signIn(data.email, data.password)
             .then(result => {
                 const user = result.user;
-                // reset({ ...data })
-                console.log(user)
+                toast('Login success');
+                // console.log(user)
+                navigate(from, { replace: true });
+
             })
             .catch(error => {
                 // console.error(error.message);
@@ -43,7 +48,7 @@ const Login = () => {
                 </form>
                 <p className='text-center'>New to Doctors Portal <Link to='/signup' className='text-secondary'>Create an account</Link></p>
                 <div className="divider">OR</div>
-                <button className='btn btn-outline w-full'>Continue With Google</button>
+                <button onClick={googlePopup} className='btn btn-outline w-full'>Continue With Google</button>
             </div>
 
         </div>
