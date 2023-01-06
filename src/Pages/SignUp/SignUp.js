@@ -1,28 +1,44 @@
 import React, { useContext, useState } from 'react';
 import { useForm } from "react-hook-form";
 import { toast } from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Contexts/AuthProvider';
+import useToken from '../../hooks/useToken';
 const SignUp = () => {
     const { createUser, updateUser, googlePopup } = useContext(AuthContext);
     const [signUpError, setSignUpError] = useState('');
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
+    const [createdUserEmail, setCreatedUserEmail] = useState('');
+    const [token] = useToken(createdUserEmail);
+    const navigate = useNavigate();
+
+    if (token) {
+        navigate('/');
+    }
+
+
+
+
     const onSubmit = data => {
         createUser(data.email, data.password)
             .then(result => {
                 setSignUpError('');
                 const user = result.user;
                 toast('user created success');
+
                 const userInfo = {
                     displayName: data.name,
                 }
                 // console.log(userInfo);
-                // updateUser(userInfo)
-                //     .then(() => { })
-                //     .catch(error => {
-                //         console.error(error)
-                //         setSignUpError(error.message)
-                //     });
+                updateUser(userInfo)
+                    .then(() => {
+
+                        saveUser(data.name, data.email);
+                    })
+                    .catch(error => {
+                        // console.error(error)
+                        // setSignUpError(error.message)
+                    });
             })
             .catch(error => {
                 console.error(error);
@@ -30,6 +46,25 @@ const SignUp = () => {
             });
         reset();
     };
+
+    const saveUser = (name, email) => {
+        const user = { name, email };
+        fetch('http://localhost:5000/users', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+
+            },
+            body: JSON.stringify(user)
+        })
+            .then(res => res.json())
+            .then(data => {
+                setCreatedUserEmail(email);
+                // console.log(data);
+            })
+    }
+
+
     return (
         <div className='h-[800px] flex justify-center items-center shadow-2xl'>
             <div className="w-96 p-7 drop-shadow-2xl">
@@ -54,7 +89,7 @@ const SignUp = () => {
                 </form>
                 <p className='text-center'>Already Have an Account <Link to='/login' className='text-secondary'>Login now</Link></p>
                 <div className="divider">OR</div>
-                <button onClick={googlePopup} className='btn btn-outline w-full'>Continue With Google</button>
+                <button onClick={googlePopup} className='btn btn-outline w-full' disabled>Continue With Google</button>
             </div>
 
         </div>

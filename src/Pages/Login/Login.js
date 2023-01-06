@@ -3,14 +3,28 @@ import { useForm } from "react-hook-form";
 import { toast } from 'react-hot-toast';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Contexts/AuthProvider';
+import useToken from '../../hooks/useToken';
 
 const Login = () => {
-    const { signIn, googlePopup } = useContext(AuthContext);
+    const { signIn, googlePopup, resetPassword } = useContext(AuthContext);
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
     const [loginError, setLoginError] = useState('');
     const location = useLocation();
     const navigate = useNavigate();
     const from = location.state?.from.pathname || '/';
+    const [loginUserEmail, setLoginUserEmail] = useState('');
+    const [token] = useToken(loginUserEmail);
+    if (token) {
+        navigate(from, { replace: true });
+
+    }
+
+
+
+
+
+
+
     const onSubmit = data => {
         setLoginError('');
         reset();
@@ -19,7 +33,7 @@ const Login = () => {
                 const user = result.user;
                 toast('Login success');
                 // console.log(user)
-                navigate(from, { replace: true });
+                setLoginUserEmail(data.email);
 
             })
             .catch(error => {
@@ -46,9 +60,10 @@ const Login = () => {
                         loginError && <p className='text-red-600'>{loginError}</p>
                     }
                 </form>
+                <button className="btn btn-link">forgot Password ?</button>
                 <p className='text-center'>New to Doctors Portal <Link to='/signup' className='text-secondary'>Create an account</Link></p>
                 <div className="divider">OR</div>
-                <button onClick={googlePopup} className='btn btn-outline w-full'>Continue With Google</button>
+                <button onClick={googlePopup} className='btn btn-outline w-full' disabled>Continue With Google</button>
             </div>
 
         </div>
